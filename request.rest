@@ -1,0 +1,115 @@
+
+
+//auth routes
+POST http://localhost:3001/email/registration
+Content-Type: application/json
+
+{
+  "email": "azhizhiashvili@mail.ru",
+  "username": "dleksandre",
+  "password": "shokiii"
+}
+
+###
+//email verification
+GET http://localhost:3001/email/verify/b6434cdd74f308438ee844ba51d81617f55f2c4a
+
+
+###
+POST http://localhost:3001/auth/login
+Content-Type: application/json
+
+{
+   
+  "username": "admin",
+  "password": "aleksandre1"
+}
+
+###
+POST http://localhost:3001/auth/logout
+Content-Type: application/json
+
+{
+   
+ "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImFsZWtzYW5kcmUiLCJpYXQiOjE3MDMzMzY2ODd9.FmSxepZL5hRmU8CU7ecDC5oPKV1xvjdDjCfycmvlti0"
+}
+
+
+//generate access token with refreshtoken route
+###
+POST http://localhost:3001/auth/token
+Content-Type: application/json
+
+{
+   
+ "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImFsZWtzYW5kcmUiLCJpYXQiOjE3MDMzMzY1MDF9.4XUciXl8CDj1PT1scP8lU3LSellBveQydocFmGOJ5Rs"
+}
+
+
+
+//passwordforgot routes
+###
+POST http://localhost:3001/email/forgot-password
+Content-Type: application/json
+
+{
+   "email":"szhizhiashvili@mail.ru"
+}
+
+###
+POST http://localhost:3001/email/reset-password/61663f7c44f250fb8f284e60f918606ec067a88f
+Content-Type: application/json
+
+{
+   "newPassword":"777"
+}
+
+
+//get products
+###
+GET http://localhost:3001/products
+
+###
+GET http://localhost:3001/products/:id 
+
+
+
+//admin routes
+###
+POST http://localhost:3001/admin/add-product
+Content-Type: application/json
+Authorization: Barer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY1ODZkOWRjNTcyMjE0NGM0YmZkZDBiMyIsInVzZXJuYW1lIjoiYWRtaW4iLCJpc0FkbWluIjp0cnVlLCJpYXQiOjE3MDMzMzgzMTYsImV4cCI6MTcwMzM2MTA3Nn0.B_-rl_IWJBYGDQpkH3aPETWdt0T0ZZAYjb_4VZBLw3g
+
+{
+      "name":"samsung Galaxy s22",
+      "shortDescription":"The samsung 22 is a powerful and feature-packed smartphone from Apple. Released in September 2019, it boasts a sleek design, a stunning Liquid Retina display, and the powerful A13 Bionic chip.",
+      "longDescription":"The samsung 22 features a 6.1-inch Liquid Retina HD display, providing vibrant colors and sharp details. Powered by the A13 Bionic chip, it delivers fast performance and energy efficiency, making it suitable for a wide range of applications, including gaming and augmented reality.One of the standout features of the iPhone 11 is its dual-camera system. The 12 MP Ultra Wide and Wide cameras work together to capture stunning photos and videos. The Night mode enhances low-light photography, producing impressive results in challenging lighting conditions. The front-facing TrueDepth camera enables Face ID for secure facial recognition and Animoji/ Memoji expressions.",
+      "quantity":10,
+      "price":100,
+      "imageUrl_1":"jdkgjkdfgd",
+      "imageUrl_2":"xkvmkdvmdk",
+      "imageUrl_3":"xkvmdkv",
+      "imageUrl_4":"gfgfgf"
+}
+
+###
+DELETE http://localhost:3001/admin/delete-product/658483572a389af7c0544ac9
+Authorization: Barer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImFkbWluIiwiaXNBZG1pbiI6dHJ1ZSwiaWF0IjoxNzAzMTg0NTQyLCJleHAiOjE3MDMxODUzMDJ9.Z81cvK-KnMzjMzyoLFONZYV97dQ783x2Q0BGi57ocio
+
+//cart routes
+###
+GET http://localhost:3001/cart/getAllCartProducts
+Authorization: Barer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY1ODZkOWRjNTcyMjE0NGM0YmZkZDBiMyIsInVzZXJuYW1lIjoiYWRtaW4iLCJpc0FkbWluIjp0cnVlLCJpYXQiOjE3MDMzMzgzMTYsImV4cCI6MTcwMzM2MTA3Nn0.B_-rl_IWJBYGDQpkH3aPETWdt0T0ZZAYjb_4VZBLw3g
+
+###
+POST http://localhost:3001/cart/addToCart/6586e1725b42b7e49fc36aff
+# Content-Type: application/json
+Authorization: Barer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY1ODZkOWRjNTcyMjE0NGM0YmZkZDBiMyIsInVzZXJuYW1lIjoiYWRtaW4iLCJpc0FkbWluIjp0cnVlLCJpYXQiOjE3MDMzMzgzMTYsImV4cCI6MTcwMzM2MTA3Nn0.B_-rl_IWJBYGDQpkH3aPETWdt0T0ZZAYjb_4VZBLw3g
+
+###
+DELETE http://localhost:3001/cart/deleteFromCart/6586e1725b42b7e49fc36aff
+Authorization: Barer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY1ODZkOWRjNTcyMjE0NGM0YmZkZDBiMyIsInVzZXJuYW1lIjoiYWRtaW4iLCJpc0FkbWluIjp0cnVlLCJpYXQiOjE3MDMzMzgzMTYsImV4cCI6MTcwMzM2MTA3Nn0.B_-rl_IWJBYGDQpkH3aPETWdt0T0ZZAYjb_4VZBLw3g
+
+###
+DELETE http://localhost:3001/cart/deleteAllFromCart
+Authorization: Barer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY1ODZkOWRjNTcyMjE0NGM0YmZkZDBiMyIsInVzZXJuYW1lIjoiYWRtaW4iLCJpc0FkbWluIjp0cnVlLCJpYXQiOjE3MDMzMzgzMTYsImV4cCI6MTcwMzM2MTA3Nn0.B_-rl_IWJBYGDQpkH3aPETWdt0T0ZZAYjb_4VZBLw3g
