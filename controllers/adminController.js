@@ -11,8 +11,19 @@ export const addProduct = async (req, res) => {
     // Call multer middleware to upload images
     await uploadImages(req, res);
 
-    const { name, shortDescription, longDescription, quantity, price } =
-      req.body;
+    const {
+      name,
+      category,
+      description,
+      mainPrice,
+      isNewProduct,
+      sale,
+      isTopSale,
+      colors,
+    } = req.body;
+
+    // Validate and parse color data
+    const colorObjects = JSON.parse(colors || "[]"); // Parse colors if provided
 
     // Check if a product with the same name already exists
     const existingProduct = await Product.findOne({ name });
@@ -28,14 +39,17 @@ export const addProduct = async (req, res) => {
     const imageFiles = req.files;
     const imageUrls = await uploadFilesToS3(imageFiles);
 
-    // Create a new product with uploaded image URLs
+    // Create a new product with uploaded image URLs and color data
     const newProduct = new Product({
       name,
-      shortDescription,
-      longDescription,
-      quantity,
-      price,
+      category, // Ensure this is an ObjectId
+      description,
       images: imageUrls, // Store the S3 URLs of the images
+      mainPrice,
+      isNewProduct,
+      sale,
+      isTopSale,
+      colors: colorObjects, // Assign the parsed color objects
     });
 
     // Save the product to the database

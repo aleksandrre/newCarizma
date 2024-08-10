@@ -48,12 +48,14 @@ const productSchema = new mongoose.Schema({
     type: String,
     required: true, // Product must have a name
   },
-  //kategoria unda iyos masivi
-  category: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "Category", // Reference to the Category model
-    required: true, // Each product must belong to a category
-  },
+  // Allow multiple categories
+  categories: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Category", // Reference to the Category model
+      required: true, // Each product must belong to at least one category
+    },
+  ],
   description: {
     type: String,
     required: true, // Product must have a description
@@ -82,7 +84,6 @@ const productSchema = new mongoose.Schema({
     type: Boolean,
     default: false, // Default value is false
   },
-
   colors: [colorSchema], // Array of color objects
 });
 
