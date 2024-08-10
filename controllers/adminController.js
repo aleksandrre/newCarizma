@@ -4,6 +4,7 @@ import configureMulter from "../services/configureMulter.js";
 import { deleteFileFromS3, uploadFilesToS3 } from "../services/s3Service.js";
 
 // Controller function to add a product
+
 export const addProduct = async (req, res) => {
   try {
     const uploadImages = configureMulter(4); // Set the maximum number of images per product
@@ -13,17 +14,17 @@ export const addProduct = async (req, res) => {
 
     const {
       name,
-      category,
+      categories, // Assume this is an array of category ObjectIds
       description,
       mainPrice,
       isNewProduct,
       sale,
       isTopSale,
-      colors,
+      colors, // Assume colors is an array of color objects
     } = req.body;
 
     // Validate and parse color data
-    const colorObjects = JSON.parse(colors || "[]"); // Parse colors if provided
+    const colorObjects = Array.isArray(colors) ? colors : [];
 
     // Check if a product with the same name already exists
     const existingProduct = await Product.findOne({ name });
@@ -42,7 +43,7 @@ export const addProduct = async (req, res) => {
     // Create a new product with uploaded image URLs and color data
     const newProduct = new Product({
       name,
-      category, // Ensure this is an ObjectId
+      categories: Array.isArray(categories) ? categories : [], // Ensure this is an array of ObjectIds
       description,
       images: imageUrls, // Store the S3 URLs of the images
       mainPrice,
