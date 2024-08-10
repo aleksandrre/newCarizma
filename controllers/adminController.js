@@ -1,5 +1,5 @@
 // adminController.js
-import Product from "../models/productModel.js";
+import { Product } from "../models/productModel.js";
 import configureMulter from "../services/configureMulter.js";
 import { deleteFileFromS3, uploadFilesToS3 } from "../services/s3Service.js";
 
