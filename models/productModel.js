@@ -29,19 +29,16 @@ const colorSchema = new mongoose.Schema({
     required: true, // Quantity must be provided
     min: 0, // Quantity should be non-negative
   },
-  salesPercentage: {
+  sale: {
     type: Number,
     required: true, // Sales percentage must be provided
     min: 0, // Should not be negative
-    max: 100, // Should not exceed 100
+    max: 100, // Should not exceed 100,
+    default: 0,
   },
   image: {
     type: String,
     required: true, // Each color must have an image
-  },
-  isOnSale: {
-    type: Boolean,
-    default: false, // Default value is false
   },
 });
 
@@ -51,6 +48,7 @@ const productSchema = new mongoose.Schema({
     type: String,
     required: true, // Product must have a name
   },
+  //kategoria unda iyos masivi
   category: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "Category", // Reference to the Category model
@@ -60,7 +58,7 @@ const productSchema = new mongoose.Schema({
     type: String,
     required: true, // Product must have a description
   },
-  photos: {
+  images: {
     type: [String], // Array of URLs or paths to product photos
     required: true, // Product must have photos
   },
@@ -73,6 +71,18 @@ const productSchema = new mongoose.Schema({
     type: Boolean,
     default: false, // Default value is false
   },
+  sale: {
+    type: Number,
+    required: true, // Sales percentage must be provided
+    min: 0, // Should not be negative
+    max: 100, // Should not exceed 100,
+    default: 0,
+  },
+  isTopSale: {
+    type: Boolean,
+    default: false, // Default value is false
+  },
+
   colors: [colorSchema], // Array of color objects
 });
 
