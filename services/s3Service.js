@@ -52,6 +52,18 @@ export const deleteFileFromS3 = async (filePath) => {
   }
 };
 
+export const deleteFilesFromS3 = async (filePaths) => {
+  try {
+    const deletePromises = filePaths.map((filePath) =>
+      deleteFileFromS3(filePath)
+    );
+    await Promise.all(deletePromises); // Wait for all files to be deleted
+  } catch (error) {
+    console.error("Error deleting files from S3:", error);
+    throw new Error("Error deleting files from S3");
+  }
+};
+
 export async function downloadFileFromS3(filePath, res) {
   const params = {
     Bucket: process.env.BUCKET_NAME,

@@ -20,17 +20,12 @@ export const addProduct = async (req, res) => {
       isNewProduct,
       sale,
       isTopSale,
-      colors, // Assume colors is an array of color objects
     } = req.body;
-
-    // Validate and parse color data
-    const colorObjects = Array.isArray(colors) ? colors : [];
 
     // Check if a product with the same name already exists
     const existingProduct = await Product.findOne({ name });
 
     if (existingProduct) {
-      // If a product with the same name exists, return a 400 response
       return res
         .status(400)
         .json({ error: "Product with this name already exists" });
@@ -40,7 +35,7 @@ export const addProduct = async (req, res) => {
     const imageFiles = req.files;
     const imageUrls = await uploadFilesToS3(imageFiles);
 
-    // Create a new product with uploaded image URLs and color data
+    // Create a new product without colors
     const newProduct = new Product({
       name,
       categories: Array.isArray(categories) ? categories : [], // Ensure this is an array of ObjectIds
@@ -50,38 +45,116 @@ export const addProduct = async (req, res) => {
       isNewProduct,
       sale,
       isTopSale,
-      colors: colorObjects, // Assign the parsed color objects
     });
 
     // Save the product to the database
     const savedProduct = await newProduct.save();
 
-    // Respond with the saved product
-    res.status(201).json(savedProduct);
+    // Respond with the product ID
+    res.status(201).json({ productId: savedProduct._id });
   } catch (error) {
-    // Handle errors
-    console.error("Error adding product:", error);
+    console.error("Error creating product:", error);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+};
+export const addColorToProduct = async (req, res) => {
+  try {
+    const uploadImage = configureMulter(1); // Set the maximum number of images per color
+
+    // Call multer middleware to upload the color image
+    await uploadImage(req, res);
+
+    const { productId, colorName, colorPrice, quantity, sale } = req.body;
+
+    // Get uploaded image URL from req.files (uploaded by multer)
+    const imageFiles = req.files;
+    const imageUrl = await uploadFilesToS3(imageFiles)[0]; // Assuming one image per color
+
+    // Find the product by ID
+    const product = await Product.findById(productId);
+
+    if (!product) {
+      return res.status(404).json({ error: "Product not found" });
+    }
+
+    // Create a new color object
+    const newColor = {
+      colorName,
+      colorPrice,
+      quantity,
+      sale,
+      image: imageUrl,
+    };
+
+    // Add the new color to the product's colors array
+    product.colors.push(newColor);
+
+    // Save the updated product
+    const updatedProduct = await product.save();
+
+    // Respond with the updated product
+    res.status(200).json(updatedProduct);
+  } catch (error) {
+    console.error("Error adding color to product:", error);
     res.status(500).json({ error: "Internal Server Error" });
   }
 };
 
 export const deleteProductById = async (req, res) => {
   try {
-    const productId = req.params.id;
+    const { productId } = req.params;
 
     // Find and delete the product by ID
     const deletedProduct = await Product.findByIdAndDelete(productId);
 
     if (!deletedProduct) {
-      // If the product with the specified ID is not found, return a 404 response
       return res.status(404).json({ error: "Product not found" });
     }
 
-    // Respond with the deleted product
-    res.json(deletedProduct);
+    // Delete the product images and color images from S3
+    await deleteFilesFromS3(deletedProduct.images);
+    const colorImages = deletedProduct.colors.map((color) => color.image);
+    await deleteFilesFromS3(colorImages);
+
+    res
+      .status(200)
+      .json({ message: "Product and its colors deleted successfully" });
   } catch (error) {
-    // Handle errors
     console.error("Error deleting product:", error);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+};
+export const deleteColorFromProductById = async (req, res) => {
+  try {
+    const { productId, colorId } = req.params;
+
+    // Find the product by ID
+    const product = await Product.findById(productId);
+
+    if (!product) {
+      return res.status(404).json({ error: "Product not found" });
+    }
+
+    // Find the color in the colors array and remove it
+    const colorIndex = product.colors.findIndex(
+      (color) => color._id.toString() === colorId
+    );
+
+    if (colorIndex === -1) {
+      return res.status(404).json({ error: "Color not found" });
+    }
+
+    const [deletedColor] = product.colors.splice(colorIndex, 1);
+
+    // Delete the associated color image from S3
+    await deleteFilesFromS3([deletedColor.image]);
+
+    // Save the updated product
+    await product.save();
+
+    res.status(200).json({ message: "Color deleted successfully", product });
+  } catch (error) {
+    console.error("Error deleting color:", error);
     res.status(500).json({ error: "Internal Server Error" });
   }
 };
