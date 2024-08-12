@@ -38,7 +38,9 @@ export const addProduct = async (req, res) => {
     // Create a new product without colors
     const newProduct = new Product({
       name,
-      categories: Array.isArray(categories) ? categories : [], // Ensure this is an array of ObjectIds
+      categories: Array.isArray(JSON.parse(categories))
+        ? JSON.parse(categories)
+        : [], // Ensure this is an array of ObjectIds
       description,
       images: imageUrls, // Store the S3 URLs of the images
       mainPrice,
