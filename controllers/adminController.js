@@ -46,6 +46,8 @@ export const addProduct = async (req, res) => {
       sale,
       isTopSale,
     });
+    console.log(categories);
+    console.log(Array.isArray(categories));
 
     // Save the product to the database
     const savedProduct = await newProduct.save();
