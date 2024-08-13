@@ -1,9 +1,41 @@
 // adminController.js
 import { Product } from "../models/productModel.js";
+import { Category } from "../models/productModel.js"; // Adjust the path to your Category model
+
 import configureMulter from "../services/configureMulter.js";
 import { deleteFileFromS3, uploadFilesToS3 } from "../services/s3Service.js";
 
 // Controller function to add a product
+export const addCategory = async (req, res) => {
+  try {
+    // Destructure the name and description from the request body
+    const { name, description } = req.body;
+
+    // Check if the category name already exists in the database
+    const existingCategory = await Category.findOne({ name });
+
+    if (existingCategory) {
+      return res
+        .status(400)
+        .json({ error: "Category with this name already exists" });
+    }
+
+    // Create a new category
+    const newCategory = new Category({
+      name,
+      description,
+    });
+
+    // Save the new category to the database
+    const savedCategory = await newCategory.save();
+
+    // Return the saved category in the response
+    res.status(201).json(savedCategory);
+  } catch (error) {
+    console.error("Error adding category:", error);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+};
 
 export const addProduct = async (req, res) => {
   try {

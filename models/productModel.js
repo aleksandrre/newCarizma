@@ -11,6 +11,13 @@ const categorySchema = new mongoose.Schema({
     type: String,
     required: false, // Optional description for the category
   },
+  // Optional: An array to hold product IDs that belong to this category
+  products: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Product",
+    },
+  ],
 });
 
 // Define the Color schema
