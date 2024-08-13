@@ -3,8 +3,8 @@ import { Product, Category } from "../models/productModel.js"; // Adjust the pat
 // Controller function to get all products
 export const getAllProducts = async (req, res) => {
   try {
-    // Fetch all products from the database and populate the category field
-    const products = await Product.find().populate("category");
+    // Fetch all products from the database without populating categories
+    const products = await Product.find();
 
     // Send the products as a JSON response
     res.json(products);
@@ -19,10 +19,8 @@ export const getAllProducts = async (req, res) => {
 export const getOneProduct = async (req, res) => {
   const { id } = req.params;
   try {
-    // Fetch the product from the database by ID and populate the category and colors fields
-    const product = await Product.findById(id)
-      .populate("category")
-      .populate("colors");
+    // Fetch the product from the database by ID
+    const product = await Product.findById(id);
 
     if (!product) {
       return res.status(404).json({ error: "Product not found" });
