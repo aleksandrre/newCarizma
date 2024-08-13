@@ -88,6 +88,15 @@ export const addProduct = async (req, res) => {
     // Save the product to the database
     const savedProduct = await newProduct.save();
 
+    // Update each category with the new product
+    const categoryIds = Array.isArray(JSON.parse(categories))
+      ? JSON.parse(categories)
+      : [];
+    await Category.updateMany(
+      { _id: { $in: categoryIds } },
+      { $push: { products: savedProduct._id } }
+    );
+
     // Respond with the product ID
     res.status(201).json({ productId: savedProduct._id });
   } catch (error) {
@@ -95,6 +104,7 @@ export const addProduct = async (req, res) => {
     res.status(500).json({ error: "Internal Server Error" });
   }
 };
+
 export const addColorToProduct = async (req, res) => {
   try {
     const uploadImage = configureMulter(1); // Set the maximum number of images per color
