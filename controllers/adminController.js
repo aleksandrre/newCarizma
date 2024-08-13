@@ -115,7 +115,7 @@ export const addColorToProduct = async (req, res) => {
     const { productId, colorName, colorPrice, quantity, sale } = req.body;
 
     // Get uploaded image URL from req.files (uploaded by multer)
-    const imageFiles = req.files;
+    const imageFiles = req.file;
     const imageUrl = await uploadFilesToS3(imageFiles)[0]; // Assuming one image per color
 
     // Find the product by ID
