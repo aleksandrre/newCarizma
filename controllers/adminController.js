@@ -118,7 +118,7 @@ export const addColorToProduct = async (req, res) => {
     const imageFiles = req.file;
 
     console.log(req.file);
-    const imageUrl = await uploadFilesToS3(imageFiles); // Assuming one image per color
+    const imageUrl = await uploadFilesToS3([imageFiles]); // Assuming one image per color
 
     // Find the product by ID
     const product = await Product.findById(productId);
