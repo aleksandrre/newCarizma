@@ -3,11 +3,24 @@ import { Product, Category } from "../models/productModel.js"; // Adjust the pat
 // Controller function to get all products
 export const getAllProducts = async (req, res) => {
   try {
-    // Fetch all products from the database without populating categories
-    const products = await Product.find();
+    // Fetch all products from the database
+    const products = await Product.find().lean(); // Use .lean() to get plain JS objects
+
+    // Calculate newPrice for each product
+    const productsWithNewPrice = products.map((product) => {
+      let newPrice = product.mainPrice;
+      if (product.sale > 0) {
+        newPrice = product.mainPrice - (product.mainPrice * product.sale) / 100;
+      }
+      // Add newPrice to the product object
+      return {
+        ...product,
+        newPrice: newPrice.toFixed(2), // Ensure newPrice is a string with two decimal places
+      };
+    });
 
     // Send the products as a JSON response
-    res.json(products);
+    res.json(productsWithNewPrice);
   } catch (error) {
     // Handle errors
     console.error("Error fetching products:", error);
