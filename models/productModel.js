@@ -20,7 +20,7 @@ const categorySchema = new mongoose.Schema({
   ],
 });
 
-// Define the Color schema
+// Defiggggne the Color schema
 const colorSchema = new mongoose.Schema({
   colorName: {
     type: String,
@@ -50,49 +50,64 @@ const colorSchema = new mongoose.Schema({
 });
 
 // Define the Product schema
-const productSchema = new mongoose.Schema({
+const productSchema = new Schema({
   name: {
     type: String,
-    required: true, // Product must have a name
+    required: true,
   },
-  // Allow multiple categories
   categories: [
     {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Category", // Reference to the Category model
-      required: true, // Each product must belong to at least one category
+      type: Schema.Types.ObjectId,
+      ref: "Category",
+      required: true,
     },
   ],
-  description: {
+  LongDescription: {
     type: String,
-    required: true, // Product must have a description
+  },
+  ShortDescription: {
+    type: String,
+    required: true,
   },
   images: {
-    type: [String], // Array of URLs or paths to product photos
-    required: true, // Product must have photos
+    type: [String],
+    required: true,
   },
   mainPrice: {
     type: Number,
-    required: true, // Main price must be provided
-    min: 0, // Main price should be non-negative
+    required: true,
+    min: 0,
   },
   isNewProduct: {
     type: Boolean,
-    default: false, // Default value is false
+    default: false,
   },
   sale: {
     type: Number,
-    required: true, // Sales percentage must be provided
-    min: 0, // Should not be negative
-    max: 100, // Should not exceed 100,
+    required: true,
+    min: 0,
+    max: 100,
     default: 0,
   },
   isTopSale: {
     type: Boolean,
-    default: false, // Default value is false
+    default: false,
   },
-  colors: [colorSchema], // Array of color objects
+  colors: [colorSchema],
 });
+
+// Define a virtual for the newPrice with two decimal places
+productSchema.virtual("newPrice").get(function () {
+  let price = this.mainPrice;
+  if (this.sale > 0) {
+    price = this.mainPrice - (this.mainPrice * this.sale) / 100;
+  }
+  return price.toFixed(2); // Return price with two decimal places
+});
+
+// Ensure virtuals are included when converting to JSON
+productSchema.set("toJSON", { virtuals: true });
+productSchema.set("toObject", { virtuals: true });
 
 // Create the models
 export const Category = mongoose.model("Category", categorySchema);
