@@ -4,7 +4,7 @@ import { Product, Category } from "../models/productModel.js"; // Adjust the pat
 export const getAllProducts = async (req, res) => {
   try {
     // Fetch all products from the database as plain JavaScript objects
-    const products = await Product.find();
+    const products = await Product.find().lean();
 
     // Process products to add `newPrice`
     const productsWithNewPrice = products.map((product) => {
