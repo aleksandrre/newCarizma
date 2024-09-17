@@ -3,24 +3,34 @@ import { Product, Category } from "../models/productModel.js"; // Adjust the pat
 // Controller function to get all products
 export const getAllProducts = async (req, res) => {
   try {
-    // Fetch all products from the database
-    const products = await Product.find(); // Use .lean() to get plain JS objects
+    // Fetch all products from the database as plain JavaScript objects
+    const products = await Product.find().lean();
 
-    // Calculate newPrice for each product
+    // Process products to add `newPrice`
     const productsWithNewPrice = products.map((product) => {
-      let newPrice = product.mainPrice;
-      if (product.sale > 0) {
-        newPrice = product.mainPrice - (product.mainPrice * product.sale) / 100;
+      // Destructure and provide defaults
+      const { mainPrice = 0, sale = 0 } = product;
+
+      // Ensure `mainPrice` and `sale` are numbers
+      if (typeof mainPrice !== "number" || typeof sale !== "number") {
+        console.error(`Invalid data: mainPrice=${mainPrice}, sale=${sale}`);
+        return product; // Return the product without modification
       }
-      // Add newPrice to the product object
-      console.log(newPrice);
+
+      // Calculate new price
+      let newPrice = mainPrice;
+
+      if (sale > 0) {
+        newPrice = mainPrice - (mainPrice * sale) / 100;
+      }
+
       return {
         ...product,
-        newPrice: newPrice.toFixed(2), // Ensure newPrice is a string with two decimal places
+        newPrice: newPrice.toFixed(2), // Ensure `newPrice` is a string with 2 decimal places
       };
     });
 
-    // Send the products as a JSON response
+    // Send the modified products as a JSON response
     res.json(productsWithNewPrice);
   } catch (error) {
     // Handle errors
