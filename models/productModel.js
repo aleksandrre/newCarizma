@@ -1,4 +1,4 @@
-import mongoose from "mongoose"; // Use import for ES module syntax
+import mongoose from "mongoose"; // Use import instead of require
 
 // Define the Category schema
 const categorySchema = new mongoose.Schema({
@@ -40,7 +40,7 @@ const colorSchema = new mongoose.Schema({
     type: Number,
     required: true, // Sales percentage must be provided
     min: 0, // Should not be negative
-    max: 100, // Should not exceed 100
+    max: 100, // Should not exceed 100,
     default: 0,
   },
   image: {
@@ -63,7 +63,11 @@ const productSchema = new mongoose.Schema({
       required: true, // Each product must belong to at least one category
     },
   ],
-  description: {
+  LongDescription: {
+    type: String,
+    required: true, // Product must have a description
+  },
+  ShortDescription: {
     type: String,
     required: true, // Product must have a description
   },
@@ -84,7 +88,7 @@ const productSchema = new mongoose.Schema({
     type: Number,
     required: true, // Sales percentage must be provided
     min: 0, // Should not be negative
-    max: 100, // Should not exceed 100
+    max: 100, // Should not exceed 100,
     default: 0,
   },
   isTopSale: {
@@ -93,19 +97,6 @@ const productSchema = new mongoose.Schema({
   },
   colors: [colorSchema], // Array of color objects
 });
-
-// Define a virtual for the newPrice with two decimal places
-productSchema.virtual("newPrice").get(function () {
-  let price = this.mainPrice;
-  if (this.sale > 0) {
-    price = this.mainPrice - (this.mainPrice * this.sale) / 100;
-  }
-  return price.toFixed(2); // Return price with two decimal places
-});
-
-// Ensure virtuals are included when converting to JSON
-productSchema.set("toJSON", { virtuals: true });
-productSchema.set("toObject", { virtuals: true });
 
 // Create the models
 export const Category = mongoose.model("Category", categorySchema);
