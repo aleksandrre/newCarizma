@@ -13,6 +13,7 @@ export const getAllProducts = async (req, res) => {
         newPrice = product.mainPrice - (product.mainPrice * product.sale) / 100;
       }
       // Add newPrice to the product object
+      console.log(newPrice);
       return {
         ...product,
         newPrice: newPrice.toFixed(2), // Ensure newPrice is a string with two decimal places
