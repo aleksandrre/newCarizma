@@ -74,7 +74,8 @@ export const addProduct = async (req, res) => {
       categories: Array.isArray(JSON.parse(categories))
         ? JSON.parse(categories)
         : [], // Ensure this is an array of ObjectIds
-      description,
+      longDescription,
+      shortDescription,
       images: imageUrls, // Store the S3 URLs of the images
       mainPrice,
       isNewProduct,
