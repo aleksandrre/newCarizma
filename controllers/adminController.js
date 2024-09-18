@@ -47,7 +47,8 @@ export const addProduct = async (req, res) => {
     const {
       name,
       categories, // Assume this is an array of category ObjectIds
-      description,
+      longDescription,
+      shortDescription,
       mainPrice,
       isNewProduct,
       sale,
