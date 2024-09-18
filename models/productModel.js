@@ -65,9 +65,11 @@ const productSchema = new mongoose.Schema({
   ],
   LongDescription: {
     type: String,
+    required: true, // Product must have a description
   },
   ShortDescription: {
     type: String,
+    required: true, // Product must have a description
   },
   images: {
     type: [String], // Array of URLs or paths to product photos
