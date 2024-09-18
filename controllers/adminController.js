@@ -128,7 +128,7 @@ export const addColorToProduct = async (req, res) => {
     if (!product) {
       return res.status(404).json({ error: "Product not found" });
     }
-
+    console.log(imageUrl);
     // Create a new color object
     const newColor = {
       colorName,
