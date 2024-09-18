@@ -135,7 +135,7 @@ export const addColorToProduct = async (req, res) => {
       colorPrice,
       quantity,
       sale,
-      image: imageUrl,
+      image: imageUrl[0],
     };
 
     // Add the new color to the product's colors array
