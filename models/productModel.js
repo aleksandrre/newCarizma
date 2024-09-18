@@ -63,11 +63,11 @@ const productSchema = new mongoose.Schema({
       required: true, // Each product must belong to at least one category
     },
   ],
-  LongDescription: {
+  longDescription: {
     type: String,
     required: true, // Product must have a description
   },
-  ShortDescription: {
+  shortDescription: {
     type: String,
     required: true, // Product must have a description
   },
