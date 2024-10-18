@@ -83,3 +83,21 @@ export const getCategory = async (req, res) => {
     res.status(500).json({ error: "Internal Server Error" });
   }
 };
+
+export const getAllCategoryName = async (req, res) => {
+  try {
+    // Fetch all categories and return only the name field
+    const categories = await Category.find({}, "name"); // 'name' selects only the name field
+
+    // If no categories are found, return an appropriate message
+    if (categories.length === 0) {
+      return res.status(404).json({ message: "No categories found" });
+    }
+
+    // Return the category names
+    res.status(200).json(categories);
+  } catch (error) {
+    // Handle any errors that occur during the fetch
+    res.status(500).json({ message: "Error retrieving category names", error });
+  }
+};
