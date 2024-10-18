@@ -99,5 +99,7 @@ export const getAllCategoryName = async (req, res) => {
   } catch (error) {
     // Handle any errors that occur during the fetch
     res.status(500).json({ message: "Error retrieving category names", error });
+  } finally {
+    console.log("here");
   }
 };

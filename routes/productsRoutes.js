@@ -12,7 +12,7 @@ router.get("/", getAllProducts);
 
 router.get("/:id", getOneProduct);
 
-router.get("/category/:id", getCategory);
+router.get("/category/:name", getCategory);
 router.get("/allCategoryNames", getAllCategoryName);
 
 export default router;
