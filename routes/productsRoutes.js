@@ -13,6 +13,6 @@ router.get("/allCategoryNames", getAllCategoryName);
 
 router.get("/:id", getOneProduct);
 
-router.get("/category/:name", getCategory);
+router.get("/category/:categoryName", getCategory);
 
 export default router;
