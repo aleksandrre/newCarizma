@@ -88,7 +88,7 @@ export const getAllCategoryName = async (req, res) => {
   try {
     // Fetch all categories and return only the name field
     const categories = await Category.find({}, "name"); // 'name' selects only the name field
-
+    console.log("it's here man");
     // If no categories are found, return an appropriate message
     if (categories.length === 0) {
       return res.status(404).json({ message: "No categories found" });
