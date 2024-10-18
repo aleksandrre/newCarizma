@@ -64,14 +64,16 @@ export const getCategory = async (req, res) => {
   const { categoryName } = req.params; // Assuming the category name is passed as a URL parameter
   try {
     // Find the category by name
+    console.log(categoryName);
     const category = await Category.findOne({ name: categoryName });
+    console.log(category);
 
     if (!category) {
       return res.status(404).json({ error: "Category not found" });
     }
 
     // Fetch all products that belong to the found category
-    const products = await Product.find({ category: category._id }).populate(
+    const products = await Product.find({ category: categoryName }).populate(
       "colors"
     );
 
@@ -87,9 +89,9 @@ export const getCategory = async (req, res) => {
 export const getAllCategoryName = async (req, res) => {
   try {
     // Fetch all categories and return only the name field
-    console.log("it is here");
+
     const categories = await Category.find({}, "name"); // 'name' selects only the name field
-    console.log("it's here man");
+
     // If no categories are found, return an appropriate message
     if (categories.length === 0) {
       return res.status(404).json({ message: "No categories found" });
