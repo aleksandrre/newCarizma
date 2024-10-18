@@ -61,26 +61,22 @@ export const getOneProduct = async (req, res) => {
 
 // Controller function to get products by category
 export const getCategory = async (req, res) => {
-  const { categoryName } = req.params; // Assuming the category name is passed as a URL parameter
+  const { categoryName } = req.params; // Get the category name from URL parameter
+
   try {
-    // Find the category by name
-    console.log(categoryName);
-    const category = await Category.findOne({ name: categoryName });
-    console.log(category);
+    // Find the category by its name and populate its products in one step
+    const category = await Category.findOne({ name: categoryName }).populate(
+      "products"
+    );
 
     if (!category) {
       return res.status(404).json({ error: "Category not found" });
     }
 
-    // Fetch all products that belong to the found category
-    const products = await Product.find({ category: categoryName }).populate(
-      "colors"
-    );
-
-    // Send the products as a JSON response
-    res.json(products);
+    // Send the populated products directly as the response
+    res.status(200).json(category.products);
   } catch (error) {
-    // Handle errors
+    // Handle errors and send a response
     console.error("Error fetching products by category:", error);
     res.status(500).json({ error: "Internal Server Error" });
   }
