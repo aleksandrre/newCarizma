@@ -9,10 +9,10 @@ import {
 const router = express.Router();
 
 router.get("/", getAllProducts);
+router.get("/allCategoryNames", getAllCategoryName);
 
 router.get("/:id", getOneProduct);
 
 router.get("/category/:name", getCategory);
-router.get("/allCategoryNames", getAllCategoryName);
 
 export default router;
