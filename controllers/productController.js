@@ -1,4 +1,4 @@
-import { Product } from "../models/ProductModel.js";
+import { Product } from "../models/productModel.js";
 import { Category } from "../models/CategoryModel.js";
 
 // Controller function to get all products

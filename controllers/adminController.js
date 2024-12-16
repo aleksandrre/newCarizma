@@ -1,5 +1,5 @@
 // adminController.js
-import { Product } from "../models/ProductModel.js";
+import { Product } from "../models/productModel.js";
 import { Category } from "../models/CategoryModel.js"; // Adjust the path to your Category model
 
 import configureMulter from "../services/configureMulter.js";
