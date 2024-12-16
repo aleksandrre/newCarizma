@@ -1,4 +1,4 @@
-import { Product } from "../models/ProductModel.js"; // Adjust the path based on your project structure
+import { Product } from "../models/ProductModel.js";
 import { Category } from "../models/CategoryModel.js";
 
 // Controller function to get all products
