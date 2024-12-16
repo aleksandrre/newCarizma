@@ -2,7 +2,7 @@
 import express from "express";
 import cors from "cors";
 import mongoose from "mongoose";
-import { User } from "./models/UserModel.js";
+import { User } from "./models/userModel.js";
 import authRoutes from "./routes/authRoutes.js";
 import emailRoutes from "./routes/emailRoutes.js";
 import productRoutes from "./routes/productsRoutes.js";

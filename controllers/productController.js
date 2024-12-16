@@ -1,5 +1,5 @@
 import { Product } from "../models/productModel.js";
-import { Category } from "../models/CategoryModel.js";
+import { Category } from "../models/categoryModel.js";
 
 // Controller function to get all products
 export const getAllProducts = async (req, res) => {

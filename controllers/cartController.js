@@ -1,4 +1,4 @@
-import { User } from "../models/UserModel.js"; // Adjust the path based on your project structure
+import { User } from "../models/userModel.js"; // Adjust the path based on your project structure
 import { Product } from "../models/productModel.js"; // Adjust the path based on your project structure
 
 // კალათაში არსებული ყველა პროდუქტის წამოღება
