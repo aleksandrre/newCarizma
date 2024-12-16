@@ -1,5 +1,5 @@
 import { User } from "../models/UserModel.js"; // Adjust the path based on your project structure
-import { Product } from "../models/ProductModel.js"; // Adjust the path based on your project structure
+import { Product } from "../models/productModel.js"; // Adjust the path based on your project structure
 
 // კალათაში არსებული ყველა პროდუქტის წამოღება
 export const getAllCartProducts = async (req, res) => {
