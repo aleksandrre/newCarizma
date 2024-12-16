@@ -1,103 +1,100 @@
-import mongoose from "mongoose"; // Use import instead of require
+import mongoose from "mongoose";
 
-// Define the Category schema
-const categorySchema = new mongoose.Schema({
-  name: {
-    type: String,
-    required: true, // Category must have a name
-    unique: true, // Ensure category names are unique
-  },
-  description: {
-    type: String,
-    required: false, // Optional description for the category
-  },
-  // Optional: An array to hold product IDs that belong to this category
-  products: [
-    {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Product",
-    },
-  ],
-});
-
-// Define the Color schema
 const colorSchema = new mongoose.Schema({
   colorName: {
     type: String,
-    required: true, // Each color must have a name
+    required: true,
   },
   colorPrice: {
     type: Number,
-    default: 0, // Default color price is 0
-    min: 0, // Color price should be non-negative
+    min: 0,
+    // default-ის ნაცვლად გამოვიყენოთ მშობელი დოკუმენტის mainPrice
+    default: function () {
+      // this არის color დოკუმენტი, this.parent() არის product დოკუმენტი
+      return this.parent().mainPrice;
+    },
   },
   quantity: {
     type: Number,
-    required: true, // Quantity must be provided
-    min: 0, // Quantity should be non-negative
+    required: true,
+    min: 0,
   },
   sale: {
     type: Number,
-    required: true, // Sales percentage must be provided
-    min: 0, // Should not be negative
-    max: 100, // Should not exceed 100,
+    required: true,
+    min: 0,
+    max: 100,
     default: 0,
   },
   image: {
     type: String,
-    required: true, // Each color must have an image
+    required: true,
   },
 });
 
-// Define the Product schema
 const productSchema = new mongoose.Schema({
   name: {
     type: String,
-    required: true, // Product must have a name
+    required: true,
   },
-  // Allow multiple categories
   categories: [
     {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "Category", // Reference to the Category model
-      required: true, // Each product must belong to at least one category
+      ref: "Category",
+      required: true,
     },
   ],
   longDescription: {
     type: String,
-    required: true, // Product must have a description
+    required: true,
   },
   shortDescription: {
     type: String,
-    required: true, // Product must have a description
+    required: true,
   },
   images: {
-    type: [String], // Array of URLs or paths to product photos
-    required: true, // Product must have photos
+    type: [String],
+    required: true,
   },
   mainPrice: {
     type: Number,
-    required: true, // Main price must be provided
-    min: 0, // Main price should be non-negative
+    required: true,
+    min: 0,
   },
   isNewProduct: {
     type: Boolean,
-    default: false, // Default value is false
+    default: false,
   },
   sale: {
     type: Number,
-    required: true, // Sales percentage must be provided
-    min: 0, // Should not be negative
-    max: 100, // Should not exceed 100,
+    required: true,
+    min: 0,
+    max: 100,
     default: 0,
   },
   isTopSale: {
     type: Boolean,
-    default: false, // Default value is false
+    default: false,
   },
-  colors: [colorSchema], // Array of color objects
+  colors: [colorSchema],
+  simpleQuantity: {
+    type: Number,
+    min: 0,
+    required: function () {
+      return !this.colors || this.colors.length === 0;
+    },
+  },
 });
 
-// Create the models
-export const Category = mongoose.model("Category", categorySchema);
+// Virtual ველი quantity-სთვის
+productSchema.virtual("quantity").get(function () {
+  if (!this.colors || this.colors.length === 0) {
+    return this.simpleQuantity;
+  }
+  return this.colors.reduce((total, color) => total + color.quantity, 0);
+});
+
+productSchema.set("toJSON", { virtuals: true });
+productSchema.set("toObject", { virtuals: true });
+
 export const Product = mongoose.model("Product", productSchema);

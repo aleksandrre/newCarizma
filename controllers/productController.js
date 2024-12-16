@@ -1,4 +1,5 @@
-import { Product, Category } from "../models/productModel.js"; // Adjust the path based on your project structure
+import { Product } from "../models/ProductModel.js"; // Adjust the path based on your project structure
+import { Category } from "../models/CategoryModel.js";
 
 // Controller function to get all products
 export const getAllProducts = async (req, res) => {

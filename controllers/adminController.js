@@ -1,278 +1,371 @@
 // adminController.js
-import { Product } from "../models/productModel.js";
-import { Category } from "../models/productModel.js"; // Adjust the path to your Category model
+import { Product } from "../models/ProductModel.js";
+import { Category } from "../models/CategoryModel.js"; // Adjust the path to your Category model
 
 import configureMulter from "../services/configureMulter.js";
-import { deleteFileFromS3, uploadFilesToS3 } from "../services/s3Service.js";
+import { deleteFilesFromS3, uploadFilesToS3 } from "../services/s3Service.js";
 
 // Controller function to add a product
 export const addCategory = async (req, res) => {
   try {
-    // Destructure the name and description from the request body
     const { name, description } = req.body;
 
-    // Check if the category name already exists in the database
+    // ვამოწმებთ არსებობს თუ არა ასეთი კატეგორია
     const existingCategory = await Category.findOne({ name });
-
     if (existingCategory) {
-      return res
-        .status(400)
-        .json({ error: "Category with this name already exists" });
+      return res.status(400).json({
+        success: false,
+        message: "კატეგორია ასეთი სახელით უკვე არსებობს",
+      });
     }
 
-    // Create a new category
-    const newCategory = new Category({
+    // ვქმნით ახალ კატეგორიას
+    const newCategory = await Category.create({
       name,
       description,
     });
 
-    // Save the new category to the database
-    const savedCategory = await newCategory.save();
-
-    // Return the saved category in the response
-    res.status(201).json(savedCategory);
+    res.status(201).json({
+      success: true,
+      category: newCategory,
+    });
   } catch (error) {
-    console.error("Error adding category:", error);
-    res.status(500).json({ error: "Internal Server Error" });
+    res.status(500).json({
+      success: false,
+      message: "შეცდომა კატეგორიის შექმნისას",
+      error: error.message,
+    });
   }
 };
 
+// 2. პროდუქტის შექმნა
 export const addProduct = async (req, res) => {
   try {
-    const uploadImages = configureMulter(4); // Set the maximum number of images per product
-
-    // Call multer middleware to upload images
+    const uploadImages = configureMulter(4);
     await uploadImages(req, res);
 
     const {
       name,
-      categories, // Assume this is an array of category ObjectIds
+      categories, // JSON string of category IDs
       longDescription,
       shortDescription,
       mainPrice,
       isNewProduct,
       sale,
       isTopSale,
+      simpleQuantity, // თუ პროდუქტს არ აქვს ფერები
     } = req.body;
 
-    // Check if a product with the same name already exists
+    // ვამოწმებთ არსებობს თუ არა პროდუქტი
     const existingProduct = await Product.findOne({ name });
-
     if (existingProduct) {
-      return res
-        .status(400)
-        .json({ error: "Product with this name already exists" });
+      return res.status(400).json({
+        success: false,
+        message: "პროდუქტი ასეთი სახელით უკვე არსებობს",
+      });
     }
 
-    // Get uploaded image URLs from req.files (uploaded by multer)
-    const imageFiles = req.files;
-    const imageUrls = await uploadFilesToS3(imageFiles);
-
-    // Create a new product without colors
-    const newProduct = new Product({
-      name,
-      categories: Array.isArray(JSON.parse(categories))
-        ? JSON.parse(categories)
-        : [], // Ensure this is an array of ObjectIds
-      longDescription,
-      shortDescription,
-      images: imageUrls, // Store the S3 URLs of the images
-      mainPrice,
-      isNewProduct,
-      sale,
-      isTopSale,
+    // ვამოწმებთ კატეგორიებს
+    const categoryIds = JSON.parse(categories);
+    const categoryExists = await Category.find({
+      _id: { $in: categoryIds },
     });
 
-    console.log(categories);
-    console.log(Array.isArray(JSON.parse(categories)));
-    console.log(JSON.parse(categories));
+    if (categoryExists.length !== categoryIds.length) {
+      return res.status(400).json({
+        success: false,
+        message: "ერთ-ერთი მითითებული კატეგორია არ არსებობს",
+      });
+    }
 
-    // Save the product to the database
-    const savedProduct = await newProduct.save();
+    // სურათების ატვირთვა S3-ზე
+    const imageUrls = await uploadFilesToS3(req.files);
 
-    // Update each category with the new product
-    const categoryIds = Array.isArray(JSON.parse(categories))
-      ? JSON.parse(categories)
-      : [];
+    // პროდუქტის შექმნა
+    const newProduct = await Product.create({
+      name,
+      categories: categoryIds,
+      longDescription,
+      shortDescription,
+      images: imageUrls,
+      mainPrice: Number(mainPrice),
+      isNewProduct: Boolean(isNewProduct),
+      sale: Number(sale),
+      isTopSale: Boolean(isTopSale),
+      simpleQuantity: simpleQuantity ? Number(simpleQuantity) : undefined,
+    });
+
+    // კატეგორიების განახლება
     await Category.updateMany(
       { _id: { $in: categoryIds } },
-      { $push: { products: savedProduct._id } }
+      { $push: { products: newProduct._id } }
     );
 
-    // Respond with the product ID
-    res.status(201).json({ productId: savedProduct._id });
+    res.status(201).json({
+      success: true,
+      product: newProduct,
+    });
   } catch (error) {
-    console.error("Error creating product:", error);
-    res.status(500).json({ error: "Internal Server Error" });
+    res.status(500).json({
+      success: false,
+      message: "შეცდომა პროდუქტის შექმნისას",
+      error: error.message,
+    });
   }
 };
 
+// 3. პროდუქტზე ფერის დამატება
 export const addColorToProduct = async (req, res) => {
   try {
-    const uploadImage = configureMulter(1); // Set the maximum number of images per color
-
-    // Call multer middleware to upload the color image
+    const uploadImage = configureMulter(1);
     await uploadImage(req, res);
 
-    const { productId, colorName, colorPrice, quantity, sale } = req.body;
+    const { colorName, colorPrice, quantity, sale, productId } = req.body;
 
-    // Get uploaded image URL from req.files (uploaded by multer)
-    const imageFiles = req.file;
-
-    console.log(imageFiles);
-    const imageUrl = await uploadFilesToS3([imageFiles]); // Assuming one image per color
-
-    // Find the product by ID
     const product = await Product.findById(productId);
-
     if (!product) {
-      return res.status(404).json({ error: "Product not found" });
+      return res.status(404).json({
+        success: false,
+        message: "პროდუქტი ვერ მოიძებნა",
+      });
     }
-    console.log(imageUrl);
-    // Create a new color object
+
+    // სურათის ატვირთვა S3-ზე
+    const imageUrls = await uploadFilesToS3([req.file]);
+
+    // ახალი ფერის ობიექტი
     const newColor = {
       colorName,
-      colorPrice,
-      quantity,
-      sale,
-      image: imageUrl[0],
+      colorPrice, // აღარ გვჭირდება Number() რადგან სქემა თვითონ გარდაქმნის
+      quantity, // აღარ გვჭირდება Number() რადგან სქემა თვითონ გარდაქმნის
+      sale, // აღარ გვჭირდება Number() რადგან სქემა თვითონ გარდაქმნის
+      image: imageUrls[0],
     };
 
-    // Add the new color to the product's colors array
+    // ფერის დამატება პროდუქტზე
     product.colors.push(newColor);
 
-    // Save the updated product
-    const updatedProduct = await product.save();
+    // simpleQuantity-ის წაშლა თუ დაემატა ფერი
+    product.simpleQuantity = undefined;
 
-    // Respond with the updated product
-    res.status(200).json(updatedProduct);
+    await product.save();
+
+    res.status(200).json({
+      success: true,
+      product,
+    });
   } catch (error) {
-    console.error("Error adding color to product:", error);
-    res.status(500).json({ error: "Internal Server Error" });
+    res.status(500).json({
+      success: false,
+      message: "შეცდომა ფერის დამატებისას",
+      error: error,
+    });
   }
 };
 
+// 4. პროდუქტის წაშლა
 export const deleteProductById = async (req, res) => {
   try {
     const { productId } = req.params;
 
-    // Find and delete the product by ID
-    const deletedProduct = await Product.findByIdAndDelete(productId);
-
-    if (!deletedProduct) {
-      return res.status(404).json({ error: "Product not found" });
+    const product = await Product.findById(productId);
+    if (!product) {
+      return res.status(404).json({
+        success: false,
+        message: "პროდუქტი ვერ მოიძებნა",
+      });
     }
 
-    // Delete the product images and color images from S3
-    await deleteFilesFromS3(deletedProduct.images);
-    const colorImages = deletedProduct.colors.map((color) => color.image);
-    await deleteFilesFromS3(colorImages);
+    // ვშლით სურათებს S3-დან
+    const allImages = [
+      ...product.images,
+      ...product.colors.map((color) => color.image),
+    ];
+    await deleteFilesFromS3(allImages);
 
-    res
-      .status(200)
-      .json({ message: "Product and its colors deleted successfully" });
+    // ვშლით პროდუქტის ID-ს კატეგორიებიდან
+    await Category.updateMany(
+      { products: productId },
+      { $pull: { products: productId } }
+    );
+
+    // ვშლით პროდუქტს
+    await product.remove();
+
+    res.status(200).json({
+      success: true,
+      message: "პროდუქტი წარმატებით წაიშალა",
+    });
   } catch (error) {
-    console.error("Error deleting product:", error);
-    res.status(500).json({ error: "Internal Server Error" });
+    res.status(500).json({
+      success: false,
+      message: "შეცდომა პროდუქტის წაშლისას",
+      error: error.message,
+    });
   }
 };
+// ფერის წაშლა პროდუქტიდან
 export const deleteColorFromProductById = async (req, res) => {
   try {
     const { productId, colorId } = req.params;
 
-    // Find the product by ID
+    // პროდუქტის მოძებნა
     const product = await Product.findById(productId);
-
     if (!product) {
-      return res.status(404).json({ error: "Product not found" });
+      return res.status(404).json({
+        success: false,
+        message: "პროდუქტი ვერ მოიძებნა",
+      });
     }
 
-    // Find the color in the colors array and remove it
+    // ფერის მოძებნა და წაშლა
     const colorIndex = product.colors.findIndex(
       (color) => color._id.toString() === colorId
     );
 
     if (colorIndex === -1) {
-      return res.status(404).json({ error: "Color not found" });
+      return res.status(404).json({
+        success: false,
+        message: "ფერი ვერ მოიძებნა",
+      });
     }
 
+    // ვიღებთ წასაშლელ ფერს
     const [deletedColor] = product.colors.splice(colorIndex, 1);
 
-    // Delete the associated color image from S3
+    // ვშლით ფერის სურათს S3-დან
     await deleteFilesFromS3([deletedColor.image]);
 
-    // Save the updated product
+    // თუ ეს იყო ბოლო ფერი, საჭიროა simpleQuantity-ის დაყენება
+    if (product.colors.length === 0) {
+      product.simpleQuantity = 0; // ან სხვა default მნიშვნელობა
+    }
+
     await product.save();
 
-    res.status(200).json({ message: "Color deleted successfully", product });
+    res.status(200).json({
+      success: true,
+      message: "ფერი წარმატებით წაიშალა",
+      product,
+    });
   } catch (error) {
-    console.error("Error deleting color:", error);
-    res.status(500).json({ error: "Internal Server Error" });
+    res.status(500).json({
+      success: false,
+      message: "შეცდომა ფერის წაშლისას",
+      error: error.message,
+    });
   }
 };
 
+// პროდუქტის განახლება
 export const updateProduct = async (req, res) => {
   try {
-    const productId = req.params.productId; // Get product ID from request parameters
-
-    // Call multer middleware to upload images
-    const uploadImages = configureMulter(4); // Set the maximum number of images per product
+    const { productId } = req.params;
+    const uploadImages = configureMulter(4);
     await uploadImages(req, res);
 
-    const { name, shortDescription, longDescription, quantity, price } =
-      req.body;
+    const {
+      name,
+      categories,
+      shortDescription,
+      longDescription,
+      mainPrice,
+      sale,
+      isNewProduct,
+      isTopSale,
+      simpleQuantity,
+    } = req.body;
 
-    // Find the product by ID
+    // პროდუქტის მოძებნა
     const product = await Product.findById(productId);
-
     if (!product) {
-      // If product doesn't exist, return a 404 response
-      return res.status(404).json({ error: "Product not found" });
+      return res.status(404).json({
+        success: false,
+        message: "პროდუქტი ვერ მოიძებნა",
+      });
     }
 
-    // Update the product properties
-    if (name) {
-      // If name is provided, check if another product with the same name already exists
-      if (name !== product.name) {
-        const existingProduct = await Product.findOne({ name });
-        if (existingProduct) {
-          return res
-            .status(400)
-            .json({ error: "Product with this name already exists" });
-        }
-        product.name = name;
+    // სახელის შემოწმება თუ შეცვლილია
+    if (name && name !== product.name) {
+      const existingProduct = await Product.findOne({ name });
+      if (existingProduct) {
+        return res.status(400).json({
+          success: false,
+          message: "პროდუქტი ასეთი სახელით უკვე არსებობს",
+        });
       }
+      product.name = name;
     }
 
+    // კატეგორიების განახლება თუ მოწოდებულია
+    if (categories) {
+      const categoryIds = JSON.parse(categories);
+      const categoryExists = await Category.find({
+        _id: { $in: categoryIds },
+      });
+
+      if (categoryExists.length !== categoryIds.length) {
+        return res.status(400).json({
+          success: false,
+          message: "ერთ-ერთი მითითებული კატეგორია არ არსებობს",
+        });
+      }
+
+      // ძველი კატეგორიებიდან პროდუქტის ID-ის წაშლა
+      await Category.updateMany(
+        { products: productId },
+        { $pull: { products: productId } }
+      );
+
+      // ახალ კატეგორიებში პროდუქტის ID-ის დამატება
+      await Category.updateMany(
+        { _id: { $in: categoryIds } },
+        { $push: { products: productId } }
+      );
+
+      product.categories = categoryIds;
+    }
+
+    // ტექსტური ველების განახლება
     if (shortDescription) product.shortDescription = shortDescription;
     if (longDescription) product.longDescription = longDescription;
-    if (quantity) product.quantity = quantity;
-    if (price) product.price = price;
 
-    // Check if there are new images uploaded
+    // რიცხვითი ველების განახლება
+    if (mainPrice) product.mainPrice = Number(mainPrice);
+    if (sale) product.sale = Number(sale);
+
+    // boolean ველების განახლება
+    if (isNewProduct !== undefined)
+      product.isNewProduct = Boolean(isNewProduct);
+    if (isTopSale !== undefined) product.isTopSale = Boolean(isTopSale);
+
+    // simpleQuantity-ის განახლება თუ პროდუქტს არ აქვს ფერები
+    if (simpleQuantity && (!product.colors || product.colors.length === 0)) {
+      product.simpleQuantity = Number(simpleQuantity);
+    }
+
+    // სურათების განახლება თუ ატვირთულია ახალი
     if (req.files && req.files.length > 0) {
-      // Handle the files
+      // ძველი სურათების წაშლა S3-დან
+      await deleteFilesFromS3(product.images);
 
-      // Delete old images from S3
-      for (const oldImageUrl of product.images) {
-        await deleteFileFromS3(oldImageUrl);
-      }
-
-      // Upload new images to S3 and get URLs
+      // ახალი სურათების ატვირთვა
       const imageUrls = await uploadFilesToS3(req.files);
-
-      // Update product images with new URLs
       product.images = imageUrls;
     }
 
-    // Save the updated product
     const updatedProduct = await product.save();
 
-    // Respond with the updated product
-    res.json(updatedProduct);
+    res.status(200).json({
+      success: true,
+      message: "პროდუქტი წარმატებით განახლდა",
+      product: updatedProduct,
+    });
   } catch (error) {
-    // Handle errors
-    console.error("Error updating product:", error);
-    res.status(500).json({ error: "Internal Server Error" });
+    res.status(500).json({
+      success: false,
+      message: "შეცდომა პროდუქტის განახლებისას",
+      error: error.message,
+    });
   }
 };
