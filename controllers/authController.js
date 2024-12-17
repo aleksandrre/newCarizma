@@ -1,6 +1,6 @@
 // controllers/authController.js
 import jwt from "jsonwebtoken";
-import { User } from "../models/userModel.js";
+import { User } from "../models/UserModel.js";
 import { RefreshToken } from "../models/refreshTokens.js";
 import bcrypt from "bcryptjs";
 import {
