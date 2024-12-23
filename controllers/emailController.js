@@ -9,7 +9,7 @@ import {
 
 export async function registerUser(req, res) {
   try {
-    const { name, lastName, password, email } = req.body;
+    const { name, lastName, password, email, number } = req.body;
 
     // Check if the email or email already exists
     const existingUser = await User.findOne({
@@ -37,6 +37,7 @@ export async function registerUser(req, res) {
       lastName,
       password: hashedPassword,
       email,
+      number,
       emailVerificationToken,
       emailVerificationExpires: Date.now() + 24 * 60 * 60 * 1000, // Token expiration time (24 hours)
     });
