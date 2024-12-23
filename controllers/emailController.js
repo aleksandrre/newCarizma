@@ -9,19 +9,15 @@ import {
 
 export async function registerUser(req, res) {
   try {
-    const { username, password, email } = req.body;
+    const { name, lastName, password, email } = req.body;
 
-    // Check if the username or email already exists
+    // Check if the email or email already exists
     const existingUser = await User.findOne({
-      $or: [{ username: username }, { email: email }],
+      email: email,
     });
 
     if (existingUser) {
-      if (existingUser.username === username) {
-        return res.status(400).json({ message: "Username already exists" });
-      } else {
-        return res.status(400).json({ message: "Email already exists" });
-      }
+      return res.status(400).json({ message: "email already exists" });
     }
 
     // Check if the user is trying to register as an admin
@@ -37,7 +33,8 @@ export async function registerUser(req, res) {
 
     // Create a new user with the hashed password and email verification token
     const newUser = new User({
-      username,
+      name,
+      lastName,
       password: hashedPassword,
       email,
       emailVerificationToken,

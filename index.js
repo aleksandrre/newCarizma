@@ -8,6 +8,7 @@ import productRoutes from "./routes/productsRoutes.js";
 import adminRoutes from "./routes/adminRoutes.js";
 import cartRoutes from "./routes/cartRoutes.js";
 import bcrypt from "bcryptjs";
+import { User } from "./models/UserModel.js";
 
 const PORT = process.env.PORT || 3001;
 
@@ -39,32 +40,37 @@ mongoose
     console.error("Error connecting to MongoDB:", error);
   });
 
-// async function createAdminUser() {
+// async function createAdmin() {
 //   try {
-//     // Check if an admin user already exists
+//     await mongoose.connect(MONGODB_URI);
 
-//     // Generate a random token for email verification
+//     const existingAdmin = await User.findOne({
+//       email: "alekochokheli.01@gmail.com",
+//     });
+//     if (existingAdmin) {
+//       console.log("Admin already exists!");
+//       return;
+//     }
 
-//     // Hash the default admin password using bcrypt
-//     const adminPassword = "123"; // Change this to a secure password
-//     const hashedAdminPassword = await bcrypt.hash(adminPassword, 10);
+//     const hashedPassword = await bcrypt.hash("vardisferi021", 10);
 
-//     // Create a new admin user with the hashed password and email verification token
 //     const adminUser = new User({
-//       username: "admin", // Change this to the desired admin username
-//       password: hashedAdminPassword,
-//       email: "admin@example.com", // Change this to the desired admin email
-//       isAdmin: true,
+//       name: "carizma_admin", // შევცვალე username-დან name-ზე და გავხადე უნიკალური
+//       lastName: "carizma",
+//       email: "alekochokheli.01@gmail.com",
 //       emailVerified: true,
+//       password: hashedPassword,
+//       isAdmin: true,
+//       cart: [], // ცარიელი კალათა
 //     });
 
-//     // Save the admin user to the database
 //     await adminUser.save();
-
-//     console.log("Admin user registered successfully.");
+//     console.log("Admin user created successfully!");
 //   } catch (error) {
-//     console.error("Error creating admin user:", error);
+//     console.error("Error creating admin:", error);
+//   } finally {
+//     await mongoose.connection.close();
 //   }
 // }
 
-//cors პრობლემა თუ მექნება შეიძლება bucket permission cors ი უნდა გავასწორო და ჩავწერო შიგნით cors კოდი
+// createAdmin();

@@ -10,11 +10,11 @@ import {
 
 export async function login(req, res) {
   try {
-    // Extract username and password from the request body
-    const { username, password } = req.body;
+    // Extract email and password from the request body
+    const { email, password } = req.body;
 
     // Check if the user exists
-    const user = await User.findOne({ username });
+    const user = await User.findOne({ email });
     if (!user) {
       return res.status(401).json({ message: "Invalid credentials" });
     }
