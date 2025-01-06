@@ -17,7 +17,7 @@ export const getAllCartProducts = async (req, res) => {
         message: "მომხმარებელი ვერ მოიძებნა",
       });
     }
-
+    console.log(user.cart);
     res.status(200).json({
       success: true,
       cart: user.cart,
@@ -36,7 +36,17 @@ export const addToCart = async (req, res) => {
   try {
     const { productId, colorId } = req.params;
     const { quantity = 1 } = req.body;
-    const userId = req.user._id;
+    const userId = req.user.id;
+    console.log(req.user);
+
+    // მომხმარებლის შემოწმება
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "მომხმარებელი ვერ მოიძებნა",
+      });
+    }
 
     const product = await Product.findById(productId);
     if (!product) {
@@ -83,9 +93,7 @@ export const addToCart = async (req, res) => {
         price: selectedColor.colorPrice || product.mainPrice,
         sale: selectedColor.sale || product.sale,
       };
-    }
-    // უფერო პროდუქტის ლოგიკა
-    else {
+    } else {
       if (product.simpleQuantity < quantity) {
         return res.status(400).json({
           success: false,
@@ -100,8 +108,12 @@ export const addToCart = async (req, res) => {
       };
     }
 
+    // შევამოწმოთ აქვს თუ არა მომხმარებელს cart მასივი
+    if (!user.cart) {
+      user.cart = [];
+    }
+
     // არსებული item-ის შემოწმება კალათაში
-    const user = await User.findById(userId);
     const existingItemIndex = user.cart.findIndex((item) => {
       if (colorId) {
         return (
@@ -116,9 +128,9 @@ export const addToCart = async (req, res) => {
       user.cart[existingItemIndex].quantity += quantity;
       await user.save();
     } else {
-      await User.findByIdAndUpdate(userId, {
-        $push: { cart: cartItem },
-      });
+      // ვიყენებთ user.save() ნაცვლად findByIdAndUpdate-ისა
+      user.cart.push(cartItem);
+      await user.save();
     }
 
     res.status(200).json({
@@ -126,6 +138,7 @@ export const addToCart = async (req, res) => {
       message: "პროდუქტი წარმატებით დაემატა კალათაში",
     });
   } catch (error) {
+    console.error("Cart Error:", error); // დავამატოთ დეტალური logging
     res.status(500).json({
       success: false,
       message: "შეცდომა კალათაში დამატებისას",
@@ -138,24 +151,54 @@ export const addToCart = async (req, res) => {
 export const deleteFromCart = async (req, res) => {
   try {
     const { productId, colorId } = req.params;
-    const userId = req.user._id;
+    const userId = req.user.id;
 
-    const updateQuery = colorId
-      ? { $pull: { cart: { product: productId, colorId: colorId } } }
-      : { $pull: { cart: { product: productId } } };
+    // ვპოულობთ იუზერს
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "მომხმარებელი ვერ მოიძებნა",
+      });
+    }
 
-    const result = await User.updateOne({ _id: userId }, updateQuery);
+    // ვპოულობთ პროდუქტს კალათაში
+    const cartItemIndex = user.cart.findIndex((item) => {
+      if (colorId) {
+        return (
+          item.product.toString() === productId &&
+          item.colorId?.toString() === colorId
+        );
+      }
+      return item.product.toString() === productId;
+    });
 
-    if (result.modifiedCount === 0) {
+    if (cartItemIndex === -1) {
       return res.status(404).json({
         success: false,
         message: "პროდუქტი კალათაში ვერ მოიძებნა",
       });
     }
 
+    const cartItem = user.cart[cartItemIndex];
+
+    // ვამცირებთ რაოდენობას ერთით
+    cartItem.quantity -= 1;
+
+    if (cartItem.quantity === 0) {
+      // თუ რაოდენობა 0-ია, ვშლით პროდუქტს კალათიდან
+      user.cart.splice(cartItemIndex, 1);
+    }
+
+    await user.save();
+
     res.status(200).json({
       success: true,
-      message: "პროდუქტი წარმატებით წაიშალა კალათიდან",
+      message:
+        cartItem.quantity === 0
+          ? "პროდუქტი წარმატებით წაიშალა კალათიდან"
+          : "პროდუქტის რაოდენობა წარმატებით შემცირდა",
+      remainingQuantity: cartItem.quantity,
     });
   } catch (error) {
     res.status(500).json({
@@ -169,7 +212,7 @@ export const deleteFromCart = async (req, res) => {
 // კალათის გასუფთავება
 export const deleteAllFromCart = async (req, res) => {
   try {
-    const userId = req.user._id;
+    const userId = req.user.id;
 
     await User.findByIdAndUpdate(userId, { cart: [] });
 

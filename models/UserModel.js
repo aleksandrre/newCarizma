@@ -28,6 +28,33 @@ const cartItemSchema = new mongoose.Schema({
   },
 });
 
+const wishListSchema = new mongoose.Schema({
+  product: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Product",
+    required: true,
+  },
+  // ფერთან დაკავშირებული ველები optional არის
+  colorId: {
+    type: mongoose.Schema.Types.ObjectId,
+  },
+  colorName: String,
+  colorImage: String,
+  price: {
+    type: Number,
+    required: true,
+  },
+  sale: {
+    type: Number,
+    required: true,
+    default: 0,
+  },
+  addedAt: {
+    type: Date,
+    default: Date.now,
+  },
+});
+
 const userSchema = new mongoose.Schema({
   name: {
     type: String,
@@ -65,6 +92,7 @@ const userSchema = new mongoose.Schema({
   resetToken: String,
   resetTokenExpires: Date,
   cart: [cartItemSchema],
+  wishList: [wishListSchema],
 });
 
 export const User = mongoose.model("users", userSchema);

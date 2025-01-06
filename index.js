@@ -7,6 +7,8 @@ import emailRoutes from "./routes/emailRoutes.js";
 import productRoutes from "./routes/productsRoutes.js";
 import adminRoutes from "./routes/adminRoutes.js";
 import cartRoutes from "./routes/cartRoutes.js";
+import wishlistRoutes from "./routes/wishListRoutes.js";
+
 import bcrypt from "bcryptjs";
 import { User } from "./models/UserModel.js";
 
@@ -26,6 +28,7 @@ app.use("/email", emailRoutes);
 app.use("/products", productRoutes);
 app.use("/admin", adminRoutes);
 app.use("/cart", cartRoutes);
+app.use("/wishList", wishlistRoutes);
 
 // Database connection
 mongoose
