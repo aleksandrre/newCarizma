@@ -11,13 +11,15 @@ export async function registerUser(req, res) {
   try {
     const { name, lastName, password, email, number } = req.body;
 
-    // Check if the email or email already exists
-    const existingUser = await User.findOne({
-      email: email,
-    });
-
-    if (existingUser) {
-      return res.status(400).json({ message: "email already exists" });
+    // Check if the email already exists
+    const existingEmail = await User.findOne({ email: email });
+    if (existingEmail) {
+      return res.status(400).json({ message: "Email already exists" });
+    }
+    // Check if the number already exists
+    const existingNumber = await User.findOne({ number: number });
+    if (existingNumber) {
+      return res.status(400).json({ message: "Number already in use" });
     }
 
     // Check if the user is trying to register as an admin
