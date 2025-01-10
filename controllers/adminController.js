@@ -1,6 +1,7 @@
 // adminController.js
 import { Product } from "../models/productModel.js";
 import { Category } from "../models/CategoryModel.js"; // Adjust the path to your Category model
+import { FAQ } from "../models/faqModel.js"; // Import the FAQ model
 
 import configureMulter from "../services/configureMulter.js";
 import { deleteFilesFromS3, uploadFilesToS3 } from "../services/s3Service.js";
@@ -367,5 +368,101 @@ export const updateProduct = async (req, res) => {
       message: "შეცდომა პროდუქტის განახლებისას",
       error: error.message,
     });
+  }
+};
+
+// Add FAQ Type
+export const addFAQType = async (req, res) => {
+  try {
+    const { questions, name, icon } = req.body;
+
+    const newFAQType = new FAQ({
+      name,
+      icon,
+      questions,
+    });
+
+    await newFAQType.save();
+
+    res
+      .status(201)
+      .json({ message: "FAQ Type added successfully", data: newFAQType });
+  } catch (error) {
+    res
+      .status(500)
+      .json({ message: "Error adding FAQ Type", error: error.message });
+  }
+};
+
+// Delete FAQ Type (with its questions)
+export const deleteFAQType = async (req, res) => {
+  try {
+    const { faqTypeId } = req.params;
+
+    const faqType = await FAQ.findByIdAndDelete(faqTypeId);
+    if (!faqType) {
+      return res.status(404).json({ message: "FAQ Type not found" });
+    }
+
+    res
+      .status(200)
+      .json({ message: "FAQ Type and its questions deleted successfully" });
+  } catch (error) {
+    res
+      .status(500)
+      .json({ message: "Error deleting FAQ Type", error: error.message });
+  }
+};
+// Add Question to an existing FAQ Type
+export const addQuestion = async (req, res) => {
+  try {
+    const { faqTypeId, question, answer } = req.body;
+
+    const faqType = await FAQ.findById(faqTypeId);
+    if (!faqType) {
+      return res.status(404).json({ message: "FAQ Type not found" });
+    }
+
+    const newQuestion = { question, answer };
+    faqType.questions.push(newQuestion);
+
+    await faqType.save();
+
+    res
+      .status(201)
+      .json({ message: "Question added successfully", data: newQuestion });
+  } catch (error) {
+    res
+      .status(500)
+      .json({ message: "Error adding question", error: error.message });
+  }
+};
+
+// Delete Question from an existing FAQ Type
+export const deleteFuqQuestion = async (req, res) => {
+  try {
+    const { faqTypeId, FaqQuestionId } = req.params;
+
+    const faqType = await FAQ.findById(faqTypeId);
+    console.log(faqTypeId);
+    if (!faqType) {
+      return res.status(404).json({ message: "FAQ Type not found" });
+    }
+
+    const questionIndex = faqType.questions.findIndex(
+      (q) => q._id.toString() === FaqQuestionId
+    );
+    if (questionIndex === -1) {
+      return res.status(404).json({ message: "Question not found" });
+    }
+
+    faqType.questions.splice(questionIndex, 1);
+    await faqType.save();
+
+    res.status(200).json({ message: "Question deleted successfully" });
+  } catch (error) {
+    res
+      .status(500)
+      .json({ message: "Error deleting question", error: error.message });
   }
 };

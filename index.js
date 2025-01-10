@@ -8,6 +8,7 @@ import productRoutes from "./routes/productsRoutes.js";
 import adminRoutes from "./routes/adminRoutes.js";
 import cartRoutes from "./routes/cartRoutes.js";
 import wishlistRoutes from "./routes/wishListRoutes.js";
+import faqRoutes from "./routes/faqRoutes.js";
 
 import bcrypt from "bcryptjs";
 import { User } from "./models/UserModel.js";
@@ -29,6 +30,7 @@ app.use("/products", productRoutes);
 app.use("/admin", adminRoutes);
 app.use("/cart", cartRoutes);
 app.use("/wishList", wishlistRoutes);
+app.use("/faq", faqRoutes);
 
 // Database connection
 mongoose
@@ -64,7 +66,7 @@ mongoose
 //       emailVerified: true,
 //       password: hashedPassword,
 //       isAdmin: true,
-//       cart: [], // ცარიელი კალათა
+//       number:555168446,
 //     });
 
 //     await adminUser.save();
