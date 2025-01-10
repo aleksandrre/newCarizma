@@ -59,7 +59,6 @@ const userSchema = new mongoose.Schema({
   name: {
     type: String,
     required: true,
-    unique: true,
   },
   lastName: {
     type: String,
@@ -78,6 +77,9 @@ const userSchema = new mongoose.Schema({
     type: String,
     required: true,
     unique: true,
+  },
+  address: {
+    type: String,
   },
   isAdmin: {
     type: Boolean,

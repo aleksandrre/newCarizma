@@ -9,6 +9,7 @@ import adminRoutes from "./routes/adminRoutes.js";
 import cartRoutes from "./routes/cartRoutes.js";
 import wishlistRoutes from "./routes/wishListRoutes.js";
 import faqRoutes from "./routes/faqRoutes.js";
+import userRoutes from "./routes/userRoutes.js";
 
 import bcrypt from "bcryptjs";
 import { User } from "./models/UserModel.js";
@@ -31,6 +32,7 @@ app.use("/admin", adminRoutes);
 app.use("/cart", cartRoutes);
 app.use("/wishList", wishlistRoutes);
 app.use("/faq", faqRoutes);
+app.use("/user", userRoutes);
 
 // Database connection
 mongoose
