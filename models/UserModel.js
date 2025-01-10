@@ -95,6 +95,10 @@ const userSchema = new mongoose.Schema({
   resetTokenExpires: Date,
   cart: [cartItemSchema],
   wishList: [wishListSchema],
+  createdAt: {
+    type: Date,
+    default: Date.now, // Sets the current date when the document is created
+  },
 });
 
 export const User = mongoose.model("users", userSchema);
