@@ -17,10 +17,16 @@ export const getAllCartProducts = async (req, res) => {
         message: "მომხმარებელი ვერ მოიძებნა",
       });
     }
-    console.log(user.cart);
+
+    // Calculate total price
+    const totalPrice = user.cart.reduce((sum, item) => {
+      return sum + item.price * item.quantity;
+    }, 0);
+
     res.status(200).json({
       success: true,
       cart: user.cart,
+      totalPrice, // Include total price in the response
     });
   } catch (error) {
     res.status(500).json({
