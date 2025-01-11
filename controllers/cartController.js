@@ -9,7 +9,7 @@ export const getAllCartProducts = async (req, res) => {
     // Fetch the user and populate cart products
     const user = await User.findById(userId).populate({
       path: "cart.product",
-      select: "name ", // Select only necessary fields
+      select: "name images ", // Select only necessary fields
     });
 
     if (!user) {
@@ -91,7 +91,7 @@ export const addToCart = async (req, res) => {
         ...cartItem,
         colorId: selectedColor._id,
         colorName: selectedColor.colorName,
-        colorImage: selectedColor.image,
+        image: selectedColor.image,
         price: selectedColor.colorPrice || product.mainPrice,
         sale: selectedColor.sale || 0,
       };
@@ -102,11 +102,12 @@ export const addToCart = async (req, res) => {
           message: "მითითებული რაოდენობა არ არის მარაგში",
         });
       }
-
+      console.log();
       cartItem = {
         ...cartItem,
         price: product.mainPrice,
         sale: product.sale,
+        image: product.images[0],
       };
     }
 

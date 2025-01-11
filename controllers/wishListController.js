@@ -48,7 +48,7 @@ export const addToWishlist = async (req, res) => {
         ...wishListItem,
         colorId: selectedColor._id,
         colorName: selectedColor.colorName,
-        colorImage: selectedColor.image,
+        image: selectedColor.image,
         price: selectedColor.colorPrice || product.mainPrice,
         sale: selectedColor.sale || product.sale,
       };
@@ -57,6 +57,7 @@ export const addToWishlist = async (req, res) => {
         ...wishListItem,
         price: product.mainPrice,
         sale: product.sale,
+        image: product.images[0],
       };
     }
 

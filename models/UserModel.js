@@ -12,7 +12,7 @@ const cartItemSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
     },
     colorName: String,
-    colorImage: String,
+    image: String,
     quantity: {
       type: Number,
       default: 1,
@@ -52,7 +52,7 @@ const wishListSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
   },
   colorName: String,
-  colorImage: String,
+  image: String,
   price: {
     type: Number,
     required: true,
