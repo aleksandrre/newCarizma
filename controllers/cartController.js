@@ -19,9 +19,12 @@ export const getAllCartProducts = async (req, res) => {
     }
 
     // Calculate total price
-    const totalPrice = user.cart.reduce((sum, item) => {
-      return sum + item.price * item.quantity;
-    }, 0);
+    const totalPrice =
+      Math.round(
+        user.cart.reduce((sum, item) => {
+          return sum + item.price * item.quantity;
+        }, 0) * 100
+      ) / 100;
 
     res.status(200).json({
       success: true,
