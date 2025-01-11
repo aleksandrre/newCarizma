@@ -40,8 +40,7 @@ export const getAllCartProducts = async (req, res) => {
 // კალათაში პროდუქტის დამატება
 export const addToCart = async (req, res) => {
   try {
-    const { productId, colorId } = req.params;
-    const { quantity = 1 } = req.body;
+    const { quantity = 1, colorId = null, productId } = req.body;
     const userId = req.user.id;
 
     const user = await User.findById(userId);
@@ -65,7 +64,6 @@ export const addToCart = async (req, res) => {
       quantity,
     };
 
-    // Handle color logic
     if (product.colors?.length > 0) {
       if (!colorId) {
         return res.status(400).json({
@@ -98,7 +96,6 @@ export const addToCart = async (req, res) => {
         sale: selectedColor.sale || 0,
       };
     } else {
-      // Handle simple quantity products
       if (product.simpleQuantity < quantity) {
         return res.status(400).json({
           success: false,
@@ -113,14 +110,14 @@ export const addToCart = async (req, res) => {
       };
     }
 
-    // Check if cart exists
     if (!user.cart) {
       user.cart = [];
     }
 
-    // Check for existing item in cart
     const existingItemIndex = user.cart.findIndex((item) => {
-      if (colorId) {
+      const selectedColor = product.colors.id(colorId);
+
+      if (colorId && selectedColor) {
         return (
           item.product.toString() === productId &&
           item.colorId?.toString() === colorId
@@ -135,7 +132,6 @@ export const addToCart = async (req, res) => {
       user.cart.push(cartItem);
     }
 
-    // Save the user with the updated cart
     await user.save();
 
     res.status(200).json({
@@ -156,7 +152,9 @@ export const addToCart = async (req, res) => {
 // კონკრეტული პროდუქტის წაშლა კალათიდან
 export const deleteFromCart = async (req, res) => {
   try {
-    const { productId, colorId } = req.params;
+    // const { productId } = req.params;
+    const { colorId = null, productId } = req.body; // გადმოვიტანოთ colorId body-დან
+
     const userId = req.user.id;
 
     // ვპოულობთ იუზერს
