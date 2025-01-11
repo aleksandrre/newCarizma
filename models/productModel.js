@@ -1,35 +1,46 @@
 import mongoose from "mongoose";
 
-const colorSchema = new mongoose.Schema({
-  colorName: {
-    type: String,
-    required: true,
-  },
-  colorPrice: {
-    type: Number,
-    min: 0,
-    // default-ის ნაცვლად გამოვიყენოთ მშობელი დოკუმენტის mainPrice
-    default: function () {
-      // this არის color დოკუმენტი, this.parent() არის product დოკუმენტი
-      return this.parent().mainPrice;
+const colorSchema = new mongoose.Schema(
+  {
+    colorName: {
+      type: String,
+      required: true,
+    },
+    colorPrice: {
+      type: Number,
+      min: 0,
+      default: function () {
+        return this.parent().mainPrice;
+      },
+    },
+    quantity: {
+      type: Number,
+      required: true,
+      min: 0,
+    },
+    sale: {
+      type: Number,
+      required: true,
+      min: 0,
+      max: 100,
+      default: 0,
+    },
+    image: {
+      type: String,
+      required: true,
     },
   },
-  quantity: {
-    type: Number,
-    required: true,
-    min: 0,
-  },
-  sale: {
-    type: Number,
-    required: true,
-    min: 0,
-    max: 100,
-    default: 0,
-  },
-  image: {
-    type: String,
-    required: true,
-  },
+  {
+    toJSON: { virtuals: true },
+    toObject: { virtuals: true },
+  }
+);
+
+// Add virtual for discounted price
+colorSchema.virtual("discountedPrice").get(function () {
+  return Number(
+    (this.colorPrice - (this.colorPrice * this.sale) / 100).toFixed(2)
+  );
 });
 
 const productSchema = new mongoose.Schema({
