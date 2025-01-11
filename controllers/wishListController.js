@@ -158,7 +158,7 @@ export const getWishlist = async (req, res) => {
 
     const user = await User.findById(userId).populate({
       path: "wishList.product",
-      select: "title mainImage description", // შეგიძლიათ შეცვალოთ საჭირო ველების მიხედვით
+      select: "name  images", // შეგიძლიათ შეცვალოთ საჭირო ველების მიხედვით
     });
 
     if (!user) {
