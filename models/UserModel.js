@@ -121,6 +121,7 @@ const userSchema = new mongoose.Schema(
 );
 // კალათის სტატისტიკის ვირტუალური ველები
 userSchema.virtual("cartTotal").get(function () {
+  if (!this.cart || this.cart.length === 0) return 0;
   return Number(
     this.cart
       .reduce((total, item) => {
@@ -129,8 +130,8 @@ userSchema.virtual("cartTotal").get(function () {
       .toFixed(2)
   );
 });
-
 userSchema.virtual("cartOriginalTotal").get(function () {
+  if (!this.cart || this.cart.length === 0) return 0;
   return Number(
     this.cart
       .reduce((total, item) => {
@@ -141,6 +142,7 @@ userSchema.virtual("cartOriginalTotal").get(function () {
 });
 
 userSchema.virtual("cartSavings").get(function () {
+  if (!this.cart || this.cart.length === 0) return 0;
   return Number((this.cartOriginalTotal - this.cartTotal).toFixed(2));
 });
 
