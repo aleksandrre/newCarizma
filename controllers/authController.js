@@ -91,3 +91,45 @@ export async function logout(req, res) {
     res.status(500).json({ message: "Internal Server Error" });
   }
 }
+
+export const changePassword = async (req, res) => {
+  const { oldPassword, newPassword } = req.body;
+
+  if (!req.user.id) {
+    return res.status(401).json({ message: "იუზერი არ მოიძებნა" });
+  }
+  if (!newPassword || !oldPassword) {
+    return res
+      .status(400)
+      .json({ message: "გთხოვთ, შეიყვანოთ ძველი და ახალი პაროლი" });
+  }
+  const passwordRegex = /^[A-Z][a-zA-Z0-9!@#$%^&*]{7,24}$/;
+  if (!passwordRegex.test(newPassword)) {
+    return res.status(400).json({
+      message:
+        " პაროლი უნდა შეიცავდეს მინიმუმ 8 და მაქსიმუმ 25 სიმბოლოს, პირველი ასო დიდი უნდა იყოს და მინიმუმ 1 სიმბოლო.",
+    });
+  }
+
+  try {
+    const user = await User.findById(req.user.id);
+    if (!user) {
+      return res.status(404).json({ message: "იუზერი არ მოიძებნა" });
+    }
+    if (!user.password) {
+      return res.status(400).json({ message: "მომხმარებელს არ აქვს პაროლი" });
+    }
+    const isMatch = await bcrypt.compare(oldPassword, user.password);
+    if (!isMatch) {
+      return res.status(400).json({ message: "ძველი პაროლი არასწორია" });
+    }
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(newPassword, salt);
+    user.password = hashedPassword;
+    await user.save();
+    return res.status(200).json({ message: "პაროლი წარმატებით განახლდა" });
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ message: "სერვერზე შეცდომა" });
+  }
+};
