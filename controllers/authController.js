@@ -93,36 +93,45 @@ export async function logout(req, res) {
 }
 
 export const changePassword = async (req, res) => {
-  const { oldPassword, newPassword } = req.body;
-
-  if (!req.user.id) {
-    return res.status(401).json({ message: "იუზერი არ მოიძებნა" });
-  }
-  if (!newPassword || !oldPassword) {
-    return res
-      .status(400)
-      .json({ message: "გთხოვთ, შეიყვანოთ ძველი და ახალი პაროლი" });
-  }
-  const passwordRegex = /^[A-Z][a-zA-Z0-9!@#$%^&*]{7,24}$/;
-  if (!passwordRegex.test(newPassword)) {
-    return res.status(400).json({
-      message:
-        " პაროლი უნდა შეიცავდეს მინიმუმ 8 და მაქსიმუმ 25 სიმბოლოს, პირველი ასო დიდი უნდა იყოს და მინიმუმ 1 სიმბოლო.",
-    });
-  }
-
   try {
+    const { oldPassword, newPassword, newPasswordRepeat } = req.body;
+
+    if (!newPassword || !oldPassword || !newPasswordRepeat) {
+      return res
+        .status(400)
+        .json({ message: "გთხოვთ, შეიყვანოთ ძველი და ახალი პაროლი" });
+    }
+    if (oldPassword === newPassword) {
+      return res
+        .status(400)
+        .json({ message: "ახალი პაროლი უნდა განსხვავდებოდეს ძველისგან" });
+    }
+    if (newPassword !== newPasswordRepeat) {
+      return res
+        .status(400)
+        .json({ message: "შეყვანილი პაროლები არ ემთხვევა ერთმანეთს" });
+    }
+    const passwordRegex =
+      /^[A-Z](?=.*\d)(?=.*[!@#$%^&*])[a-zA-Z0-9!@#$%^&*]{7,24}$/;
+
+    if (!passwordRegex.test(newPassword)) {
+      return res.status(400).json({
+        message:
+          "პაროლი უნდა შეიცავდეს მინიმუმ 8 და მაქსიმუმ 25 სიმბოლოს, პირველი ასო დიდი უნდა იყოს და მინიმუმ 1 სიმბოლო.",
+      });
+    }
+
     const user = await User.findById(req.user.id);
+
     if (!user) {
       return res.status(404).json({ message: "იუზერი არ მოიძებნა" });
     }
-    if (!user.password) {
-      return res.status(400).json({ message: "მომხმარებელს არ აქვს პაროლი" });
-    }
+
     const isMatch = await bcrypt.compare(oldPassword, user.password);
     if (!isMatch) {
       return res.status(400).json({ message: "ძველი პაროლი არასწორია" });
     }
+
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(newPassword, salt);
     user.password = hashedPassword;
