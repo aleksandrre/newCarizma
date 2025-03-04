@@ -17,7 +17,7 @@ export function generateRefreshToken(user) {
     name: user.name,
     isAdmin: user.isAdmin,
   };
-  return jwt.sign(userproperties, {
+  return jwt.sign(userproperties, process.env.REFRESH_TOKEN_SECRET, {
     expiresIn: "7d", // ვადა 7 დღე
   });
 }
