@@ -194,7 +194,7 @@ export const deleteProductById = async (req, res) => {
     );
 
     // ვშლით პროდუქტს
-    await product.remove();
+    await product.deleteOne();
 
     res.status(200).json({
       success: true,

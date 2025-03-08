@@ -27,7 +27,7 @@ router.delete(
   deleteColorFromProductById
 );
 router.delete(
-  "/delete-product/:id",
+  "/delete-product/:productId",
   authenticateToken,
   isAdmin,
   deleteProductById
