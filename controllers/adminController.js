@@ -9,7 +9,7 @@ import { deleteFilesFromS3, uploadFilesToS3 } from "../services/s3Service.js";
 // Controller function to add a product
 export const addCategory = async (req, res) => {
   try {
-    const { name, description } = req.body;
+    const { name, geoName, description, icon, route } = req.body;
 
     // ვამოწმებთ არსებობს თუ არა ასეთი კატეგორია
     const existingCategory = await Category.findOne({ name });
@@ -23,7 +23,10 @@ export const addCategory = async (req, res) => {
     // ვქმნით ახალ კატეგორიას
     const newCategory = await Category.create({
       name,
+      geoName,
       description,
+      icon,
+      route,
     });
 
     res.status(201).json({

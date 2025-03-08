@@ -6,9 +6,21 @@ const categorySchema = new mongoose.Schema({
     required: true,
     unique: true,
   },
+  geoName: {
+    type: String,
+    required: true,
+  },
   description: {
     type: String,
     required: false,
+  },
+  icon: {
+    type: String,
+    required: true,
+  },
+  route: {
+    type: String,
+    required: true,
   },
   products: [
     {

@@ -28,7 +28,8 @@ export async function login(req, res) {
     if (!passwordMatch) {
       return res.status(401).json({ message: "Invalid credentials" });
     }
-    await RefreshToken.deleteMany();
+    //await RefreshToken.deleteMany({ userId: user._id });  // ანუუ აქ ძველი refreshtokenebi იშლეება კონკრეტული მომხმარებლის
+    //და თუ გვინდა რომ რამდენიმე მოწყობილობაზე ერთდროულად შეეძლოს შესვლა მაშინ ეს არ გვჭირდება
     const accessToken = generateAccessToken(user);
     const refreshToken = generateRefreshToken(user);
     const newRefreshToken = new RefreshToken({
