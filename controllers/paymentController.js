@@ -22,6 +22,7 @@ export const initiatePayment = async (req, res) => {
       status: "pending",
       customer_email: email,
       customer_phone: phone,
+      server_callback_url: "localhost:3001/payments/payment-callback",
     });
 
     const paymentData = await createPayment(orderId, amount, email, phone);

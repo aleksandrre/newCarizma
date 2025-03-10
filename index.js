@@ -39,7 +39,7 @@ app.use("/faq", faqRoutes);
 app.use("/user", userRoutes);
 app.use("/subscription", subscriptionRoutes);
 app.use("/question", questionRoutes);
-app.use("/api/payments", paymentRoutes);
+app.use("/payments", paymentRoutes);
 
 // Database connection
 mongoose
