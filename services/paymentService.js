@@ -25,6 +25,8 @@ export const createPayment = async (orderId, amount, email, phone) => {
     order_desc: "Carizma Order",
     currency: "GEL",
     amount: amount * 100, // თეთრებში
+    server_callback_url:
+      "https://newcarizma.onrender.com/payments/payment-callback",
   };
 
   // ✅ Signature-ის სწორად გენერაცია
