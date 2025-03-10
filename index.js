@@ -12,6 +12,7 @@ import faqRoutes from "./routes/faqRoutes.js";
 import userRoutes from "./routes/userRoutes.js";
 import subscriptionRoutes from "./routes/subscriptionRoutes.js";
 import questionRoutes from "./routes/questionRoutes.js";
+import paymentRoutes from "./routes/paymentRoutes.js";
 
 import bcrypt from "bcryptjs";
 import { User } from "./models/UserModel.js";
@@ -38,6 +39,7 @@ app.use("/faq", faqRoutes);
 app.use("/user", userRoutes);
 app.use("/subscription", subscriptionRoutes);
 app.use("/question", questionRoutes);
+app.use("/api/payments", paymentRoutes);
 
 // Database connection
 mongoose
