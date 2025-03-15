@@ -3,14 +3,23 @@ import dotenv from "dotenv";
 import CloudIpsp from "cloudipsp-node-js-sdk";
 dotenv.config();
 
-// Signature-ის გენერაციის ფუნქცია
+// ✅ Signature-ის სწორად გენერაციის ფუნქცია
 const generateSignature = (data) => {
-  const secretKey = process.env.SECRET_KEY; // Secret Key .env-დან
-  const values = Object.values(data).join("|"); // სწორად დალაგებული პარამეტრები
-  return crypto
-    .createHash("sha1")
-    .update(values + secretKey)
-    .digest("hex");
+  const secretKey = process.env.SECRET_KEY;
+  let signatureString = [secretKey]; // პირველ რიგში ვამატებთ secretKey-ს
+
+  // ანბანური წესით დალაგება და ცარიელი პარამეტრების ამოღება
+  Object.keys(data)
+    .sort()
+    .forEach((key) => {
+      if (data[key] !== "" && data[key] !== null && data[key] !== undefined) {
+        signatureString.push(data[key]);
+      }
+    });
+
+  const finalString = signatureString.join("|"); // საბოლოო signature-ის სტრიქონი
+  console.log("Signature String:", finalString); // Debugging
+  return crypto.createHash("sha1").update(finalString).digest("hex"); // SHA1 hash
 };
 
 const fondy = new CloudIpsp({
@@ -20,7 +29,7 @@ const fondy = new CloudIpsp({
 
 export const createPayment = async (orderId, amount, email, phone) => {
   const requestData = {
-    // merchant_id: process.env.MERCHANT_ID,
+    merchant_id: process.env.MERCHANT_ID,
     order_id: orderId,
     order_desc: "Carizma Order",
     currency: "GEL",
@@ -29,8 +38,10 @@ export const createPayment = async (orderId, amount, email, phone) => {
       "https://newcarizma.onrender.com/payments/payment-callback",
   };
 
-  // ✅ Signature-ის სწორად გენერაცია
+  // ✅ Signature-ის გენერაცია და დამატება
   requestData.signature = generateSignature(requestData);
+
+  console.log("Final Request Data:", requestData); // Debugging
 
   try {
     const response = await fondy.Checkout(requestData);

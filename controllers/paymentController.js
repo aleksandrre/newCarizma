@@ -4,7 +4,8 @@ import { createPayment } from "../services/paymentService.js";
 
 export const initiatePayment = async (req, res) => {
   try {
-    const { orderId, amount, email, phone, user_id } = req.body;
+    const { orderId, amount, email, phone } = req.body;
+    const user_id = req.user.id;
 
     // 🔥 გადაამოწმე, არსებობს თუ არა უკვე ეს order_id
     const existingPayment = await Payment.findOne({ order_id: orderId });
@@ -25,7 +26,7 @@ export const initiatePayment = async (req, res) => {
     });
 
     const paymentData = await createPayment(orderId, amount, email, phone);
-    res.json({ paymentUrl: paymentData.checkout_url });
+    res.json({ paymentData });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
