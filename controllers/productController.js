@@ -33,7 +33,7 @@ export const getCategory = async (req, res) => {
 
   try {
     // Find the category by its name and populate its products in one step
-    const category = await Category.findOne({ name: categoryName }).populate(
+    const category = await Category.findOne({ id: categoryName }).populate(
       "products"
     );
 
@@ -54,7 +54,7 @@ export const getAllCategoryName = async (req, res) => {
   try {
     // Fetch all categories and return only the name field
 
-    const categories = await Category.find({}, "name"); // 'name' selects only the name field
+    const categories = await Category.find(); // 'name' selects only the name field
 
     // If no categories are found, return an appropriate message
     if (categories.length === 0) {
